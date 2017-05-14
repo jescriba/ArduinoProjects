@@ -1,10 +1,6 @@
 #include "modes.h"
 
-#define FALSE                0
-#define TRUE                 1
-#define POT_PIN              2
 #define BUTTON               7
-#define POT_MAX              625
 #define DEFAULT_INTERVAL     30
 #define HELD_INTERVAL        700
 #define DEBOUNCE_INTERVAL    30
@@ -20,7 +16,6 @@ typedef enum e_Gesture {
 /*
   Functions to read sensors
 */
-float read_resistor_ratio();
 void read_gesture(Gesture *previous_gesture);
 
 /*
@@ -38,44 +33,49 @@ void setup() {
 */
 void loop() {
   Gesture gesture = NONE;
-  int current_mode_index = 0;
   long current_time;
-  Mode mode = mode_0;
-  while(true) {
+  Mode *mode = &mode_0;
+  int has_held_mode_executed = 0;
+  while(1) {
     current_time = millis();
     read_gesture(&gesture);
     switch (gesture) {
       case NONE:
-        //Serial.println("NONE");
-        mode.execute(&mode);
+       // Serial.println("none");
+        mode->execute(mode);
         break;
       case HELD:
-        //Serial.println("HELD");
-        mode.initialized = 0;
-        mode = mode_held;
-        mode.execute(&mode);
+        //Serial.println("Held");
+        Serial.println("Mode held initialized");
+        Serial.println(mode_held.initialized);
+        mode = &mode_held;
+        mode->execute(mode);
+        has_held_mode_executed = 1;
         break;
       case TAP:
-        //Serial.println("TAP");
-        mode.initialized = 0;
-        change_mode(&mode, &current_mode_index);
-        mode.execute(&mode);                             
+        //Serial.println("tap");
+        if (has_held_mode_executed) {
+          // Update mode based on held value
+          update_mode(mode);
+          has_held_mode_executed = 0;
+          mode_held.initialized = 0;
+          Serial.println("Updating mode");
+          Serial.println(mode_held.initialized);
+        } else {
+          // Increment mode
+          change_mode(mode);
+        }
+        mode->initialized = 0;
+        mode->execute(mode);
         break;
       case DOUBLE_TAP:
-        //Serial.println("DOUBLE_TAP");
-        mode.initialized = 0;
-        mode = mode_off;
-        mode.execute(&mode);
+       // Serial.println("double tap");
+        mode->initialized = 0;
+        mode = &mode_off;
+        mode->execute(mode);
         break;
     }
   }
-}
-
-/*
-  Read potentiometer value as a ratio of it's max value
-*/
-float read_pot() {
-  return analogRead(POT_PIN) / (float)POT_MAX;
 }
 
 /*
