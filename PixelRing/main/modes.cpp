@@ -34,56 +34,56 @@ Color random_color_between(Color min_color, Color max_color) {
   };
 }
 
-void update_mode(Mode *mode) {
+void update_mode(Mode **mode) {
     switch (mode_index) {
     case 0:
-      (*mode) = mode_0;
+      *mode = &mode_0;
       mode_index = 0;
       break;
     case 1:
-      (*mode) = mode_1;
+      *mode = &mode_1;
       mode_index = 1;
       break;
     case 2:
-      (*mode) = mode_2;
+      *mode = &mode_2;
       mode_index = 2;
       break;
     case 3:
-      (*mode) = mode_3;
+      *mode = &mode_3;
       mode_index = 3;
       break;
     case 4:
-      (*mode) = mode_4;
+      *mode = &mode_4;
       mode_index = 4;
       break;
     case 5:
-      (*mode) = mode_5;
+      *mode = &mode_5;
       mode_index = 5;
       break;
     case 6:
-      (*mode) = mode_6;
+      *mode = &mode_6;
       mode_index = 6;
       break;
     case 7:
-      (*mode) = mode_7;
+      *mode = &mode_7;
       mode_index = 7;
       break;
     case 8:
-      (*mode) = mode_8;
+      *mode = &mode_8;
       mode_index = 8;
       break; 
     case 9:
-      (*mode) = mode_9;
+      *mode = &mode_9;
       mode_index = 9;
       break; 
     case 10:
-      (*mode) = mode_10;
+      *mode = &mode_10;
       mode_index = 10;
       break;
   }
 }
 
-void change_mode(Mode *mode) {
+void change_mode(Mode **mode) {
   mode_index++;
   mode_index %= MODE_COUNT;
 
@@ -101,14 +101,9 @@ void mode_off_execute(Mode *mode) {
 }
 
 void mode_held_execute(Mode *mode) {
-  int *initialized;
-  initialized = &(mode->initialized);
-  int blah = *initialized;
-  Serial.println("executing with index");
-  Serial.println(mode_index);
-  if (!*initialized) {
-    Serial.println("initializing");
-    *initialized = 1;
+  int initialized = mode->initialized;
+  if (!initialized) {
+    mode->initialized = 1;
     fill((Color){0, 0, 0});
   }
 
@@ -683,8 +678,10 @@ Mode mode_7;
 Mode mode_8;
 Mode mode_9;
 Mode mode_10;
+Color colors[PIXEL_COUNT];
 void initialize() {
   pixels.begin(); // This initializes the NeoPixel library.
+  
   unsigned long current_time = millis();
   Event *events_off = (Event*)malloc(sizeof(Event));
   events_off[0].index = 0;

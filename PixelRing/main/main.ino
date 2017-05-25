@@ -41,35 +41,27 @@ void loop() {
     read_gesture(&gesture);
     switch (gesture) {
       case NONE:
-       // Serial.println("none");
         mode->execute(mode);
         break;
       case HELD:
-        //Serial.println("Held");
-        Serial.println("Mode held initialized");
-        Serial.println(mode_held.initialized);
         mode = &mode_held;
         mode->execute(mode);
         has_held_mode_executed = 1;
         break;
       case TAP:
-        //Serial.println("tap");
         if (has_held_mode_executed) {
           // Update mode based on held value
-          update_mode(mode);
+          update_mode(&mode);
           has_held_mode_executed = 0;
           mode_held.initialized = 0;
-          Serial.println("Updating mode");
-          Serial.println(mode_held.initialized);
         } else {
           // Increment mode
-          change_mode(mode);
+          change_mode(&mode);
         }
         mode->initialized = 0;
         mode->execute(mode);
         break;
       case DOUBLE_TAP:
-       // Serial.println("double tap");
         mode->initialized = 0;
         mode = &mode_off;
         mode->execute(mode);

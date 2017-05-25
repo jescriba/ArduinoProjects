@@ -23,9 +23,10 @@ typedef struct Mode {
 
 void initialize();
 void fill(Color color);
-void update_mode(Mode *mode); 
-void change_mode(Mode *mode);
+void update_mode(Mode **mode); 
+void change_mode(Mode **mode);
 float knob_value();
+extern Color colors[];
 extern int mode_index;
 extern Mode mode_off;
 extern Mode mode_held;
