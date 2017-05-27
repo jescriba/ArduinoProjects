@@ -1,37 +1,35 @@
 #include <Adafruit_NeoPixel.h>
 #include "modes.h"
+//#include <stdarg.h>
 
+int mode_index = 0;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXEL_COUNT, LIGHT_PIN, NEO_GRB + NEO_KHZ800);
 
-void light_color_at_index(Color color, int index) {
-  int red = color.red, green = color.green, blue = color.blue;
-  pixels.setPixelColor(index, pixels.Color(red, green, blue));
+void set_color(int index, uint32_t rgb) {
+  pixels.setPixelColor(index, rgb);
   pixels.show();
 }
 
-int mode_index = 0;
-
-void fill(Color color) {
-  int red = color.red, green = color.green, blue = color.blue;
+void fill(uint32_t rgb) {
   for (int i = 0; i < PIXEL_COUNT; i++) {
-    pixels.setPixelColor(i, pixels.Color(red, green, blue));
+    pixels.setPixelColor(i, rgb);
     pixels.show();
   }
 }
 
-Color random_color(Color max_color) {
-  int red = max_color.red, green = max_color.green, blue = max_color.blue;
-  return (Color) {
-    (int)random(red), (int)random(green), (int)random(blue)
-  };
+void alternate_colors() {
+  
 }
 
-Color random_color_between(Color min_color, Color max_color) {
-  int max_red = max_color.red, max_green = max_color.green, max_blue = max_color.blue;
-  int min_red = min_color.red, min_green = min_color.green, min_blue = min_color.blue;
-  return (Color) {
-    min_red + (int)random(max_red), min_green + (int)random(max_green), min_blue + (int)random(max_blue)
-  };
+uint32_t color(uint8_t r, uint8_t g, uint8_t b) {
+  return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
+}
+
+uint32_t random_color(uint8_t r, uint8_t g, uint8_t b) {
+  int red = random(r);
+  int green = random(g);
+  int blue = random(b);
+  return color(red, green, blue);
 }
 
 void update_mode(Mode **mode) {
@@ -80,6 +78,10 @@ void update_mode(Mode **mode) {
       *mode = &mode_10;
       mode_index = 10;
       break;
+    case 11:
+      *mode = &mode_11;
+      mode_index = 11;
+      break;
   }
 }
 
@@ -95,16 +97,14 @@ float knob_value() {
 }
 
 void mode_off_execute(Mode *mode) {
-  fill((Color) {
-    0, 0, 0
-  });
+  fill(color(0, 0, 0));
 }
 
 void mode_held_execute(Mode *mode) {
   int initialized = mode->initialized;
   if (!initialized) {
     mode->initialized = 1;
-    fill((Color){0, 0, 0});
+    fill(color(0, 0, 0));
   }
 
   int selected_mode = map(knob_value(), 0, KNOB_MAX, 0, MODE_COUNT - 1);
@@ -114,10 +114,9 @@ void mode_held_execute(Mode *mode) {
   if (current_time - *previous_time >= 30) {
     for (int i = 0; i < PIXEL_COUNT ; i++) {
       if (i <= selected_mode) {
-        Color color = (Color){2, 0, 4};
-        light_color_at_index(color, i);
+        set_color(i, color(2, 0, 4));
       } else {
-        light_color_at_index((Color){0, 0, 0}, i);
+        set_color(i, color(0, 0, 0));
       }
     }
     mode_index = selected_mode;
@@ -129,10 +128,9 @@ void mode_0_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 1; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -160,8 +158,7 @@ void mode_0_execute(Mode *mode) {
 
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = random_color_between((Color) { 1, 0, 0 }, (Color) { 2, 0, 0 });
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, color(2, 0, 0));
     (*index_0)++;
     *index_0 %= PIXEL_COUNT;
     *previous_time_0 = current_time;
@@ -169,8 +166,7 @@ void mode_0_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 1000);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = random_color_between((Color) { 0, 0, 0 }, (Color) {0, 0, 5 });
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, color(0, 0, 2));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
     *previous_time_1 = current_time;
@@ -178,8 +174,7 @@ void mode_0_execute(Mode *mode) {
 
   int delay_2 = map(knob_val, 0, KNOB_MAX, 25, 2100);
   if (current_time - *previous_time_2 >= delay_2) {
-    Color color = random_color_between((Color) { 0, 0, 0 }, (Color) {0, 5, 0 });
-    light_color_at_index(color, *index_2);
+    set_color(*index_2, color(0, 2, 0));
     (*index_2)++;
     *index_2 %= PIXEL_COUNT;
     *previous_time_2 = current_time;
@@ -191,10 +186,9 @@ void mode_1_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 2; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -208,8 +202,7 @@ void mode_1_execute(Mode *mode) {
 
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 300);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = random_color((Color) { 2, 2, 2 });
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, color(2, 2, 2));
     (*index_0)++;
     *index_0 %= PIXEL_COUNT;
     *previous_time_0 = current_time;
@@ -221,10 +214,9 @@ void mode_2_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 3; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -236,8 +228,7 @@ void mode_2_execute(Mode *mode) {
 
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 400);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = random_color((Color) { 3, 2, 3 });
-    light_color_at_index(color, (int)random(PIXEL_COUNT));
+    set_color((int)random(PIXEL_COUNT), random_color(3, 2, 3));
     *previous_time_0 = current_time;
   }
 }
@@ -247,10 +238,9 @@ void mode_3_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 4; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -278,8 +268,7 @@ void mode_3_execute(Mode *mode) {
 
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = (Color) {0, 1, 1};
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, color(0, 1, 1));
     (*index_0)--;
     *index_0 %= PIXEL_COUNT;
 
@@ -291,8 +280,7 @@ void mode_3_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = (Color) {1, 1, 0};
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, color(1, 1, 0));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
     *previous_time_1 = current_time;
@@ -300,8 +288,7 @@ void mode_3_execute(Mode *mode) {
 
   int delay_2 = map(knob_val, 0, KNOB_MAX, 25, 1500);
   if (current_time - *previous_time_2 >= delay_2) {
-    Color color = (Color) {1, 0, 1};
-    light_color_at_index(color, *index_2);
+    set_color(*index_2, color(1, 0, 1));
     (*index_2)++;
     *index_2 %= PIXEL_COUNT;
     *previous_time_2 = current_time;
@@ -313,10 +300,9 @@ void mode_4_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 5; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -338,8 +324,7 @@ void mode_4_execute(Mode *mode) {
 
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = (Color) {4, 1, 3};
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, color(4, 1, 3));
     (*index_0)--;
     *index_0 %= PIXEL_COUNT;
 
@@ -351,8 +336,7 @@ void mode_4_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = (Color) {2, 0, 0};
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, color(2, 0, 0));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
     *previous_time_1 = current_time;
@@ -364,10 +348,9 @@ void mode_5_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 6; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -389,12 +372,11 @@ void mode_5_execute(Mode *mode) {
   
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = (Color) {1, 0, 0};
     if (*index_0 == *index_1) {
-      light_color_at_index((Color) {1, 0, 1}, *index_0 + 1);
+      set_color(*index_0 + 1, color(1, 0, 1));
     } else {
-      light_color_at_index(color, *index_0);
-      light_color_at_index((Color) {0, 0, 0}, *index_0 + 1);
+      set_color(*index_0, color(1, 0, 0));
+      set_color(*index_0 + 1, color(0, 0, 0));
     }
     (*index_0)--;
     *index_0 %= PIXEL_COUNT;
@@ -407,9 +389,8 @@ void mode_5_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = (Color) {0, 0, 1};
-    light_color_at_index(color, *index_1);
-    light_color_at_index((Color) {0, 0, 0}, *index_1 - 1);
+    set_color(*index_1, color(0, 0, 1));
+    set_color(*index_1 - 1, color(0, 0, 0));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
     *previous_time_1 = current_time;
@@ -421,10 +402,9 @@ void mode_6_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 7; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -446,8 +426,7 @@ void mode_6_execute(Mode *mode) {
   
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = random_color_between((Color) { 2, 0, 0 }, (Color) {2, 0, 2 });
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, random_color(2, 0, 2));
     (*index_0)--;
     *index_0 %= PIXEL_COUNT;
 
@@ -459,8 +438,7 @@ void mode_6_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = random_color_between((Color) { 1, 3, 0 }, (Color) {2, 4, 0 });
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, color(2, 4, 0));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
     *previous_time_1 = current_time;
@@ -472,10 +450,9 @@ void mode_7_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 8; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -512,9 +489,8 @@ void mode_7_execute(Mode *mode) {
       *index_0 = PIXEL_COUNT - 1;
     }
     
-    Color color = random_color_between((Color) { 0, 0, 1 }, (Color) { 2, 0, 2 });
-    light_color_at_index(color, *index_0);
-    light_color_at_index((Color){0, 0, 0}, previous_int);
+    set_color(*index_0, random_color(2, 0, 2));
+    set_color(previous_int, color(0, 0, 0));
     
     *previous_time_0 = current_time;
   }
@@ -525,10 +501,9 @@ void mode_8_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 9; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -544,8 +519,7 @@ void mode_8_execute(Mode *mode) {
   
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time >= delay_0) {
-    Color color = random_color_between((Color) { 2, 0, 0 }, (Color) {2, 0, 2 });
-    light_color_at_index(color, *index);
+    set_color(*index, random_color(2, 0, 2));
     (*index)--;
     *index %= PIXEL_COUNT;
 
@@ -561,10 +535,9 @@ void mode_9_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 10; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -585,15 +558,14 @@ void mode_9_execute(Mode *mode) {
   
   int delay_0 = map(knob_val, 0, KNOB_MAX, 40000, 80000);
   if (current_time - *previous_time_0 >= delay_0) {
-    fill((Color) {0, 0, 0});
+    fill(color(0, 0, 0));
     
     *previous_time_0 = current_time;
   }
   
   int delay_1 = map(knob_val, 0, KNOB_MAX, 200, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = random_color((Color) { 2, 2, 2 });
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, random_color(2, 2, 2));
     int rand_int = random(3);
     if (rand_int == 2) {
       (*index_1)++;
@@ -613,10 +585,9 @@ void mode_10_execute(Mode *mode) {
   initialized = &(mode->initialized);
   if (!*initialized) {
     *initialized = 1;
-    fill((Color){0, 0, 0});
-    Color color = (Color){2, 0, 4};
+    fill(color(0, 0, 0));
     for (int i = 1; i <= 11; i++) {
-      light_color_at_index(color, i);
+      set_color(i, color(2, 0, 4));
     }
   }
   
@@ -644,8 +615,7 @@ void mode_10_execute(Mode *mode) {
   
   int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 500);
   if (current_time - *previous_time_0 >= delay_0) {
-    Color color = random_color_between((Color) { 2, 0, 0 }, (Color) {2, 0, 2 });
-    light_color_at_index(color, *index_0);
+    set_color(*index_0, random_color(2, 0, 2));
     (*index_0)--;
     *index_0 %= PIXEL_COUNT;
 
@@ -657,10 +627,64 @@ void mode_10_execute(Mode *mode) {
 
   int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
   if (current_time - *previous_time_1 >= delay_1) {
-    Color color = random_color_between((Color) { 1, 3, 0 }, (Color) {2, 4, 0 });
-    light_color_at_index(color, *index_1);
+    set_color(*index_1, random_color(2, 0, 4));
     (*index_1)++;
     *index_1 %= PIXEL_COUNT;
+    *previous_time_1 = current_time;
+  }
+} 
+
+void mode_11_execute(Mode *mode) {
+  int *initialized;
+  initialized = &(mode->initialized);
+  if (!*initialized) {
+    *initialized = 1;
+    fill(color(0, 0, 0));
+    for (int i = 1; i <= 12; i++) {
+      set_color(i, color(2, 0, 4));
+    }
+  }
+  
+  unsigned long current_time = millis();
+  
+  int *index_0;
+  index_0 = &mode->events[0].index;
+
+  int *index_1;
+  index_1 = &mode->events[1].index;
+
+  unsigned long *previous_time_0;
+  previous_time_0 = &mode->events[0].previous_time;
+
+  unsigned long *previous_time_1;
+  previous_time_1 = &(mode->events[1].previous_time);
+
+  float knob_val = knob_value();
+
+  int semi_sort = 1;
+  for (int i = 0; i < PIXEL_COUNT - 1; i++) {
+      uint32_t color_1 = pixels.getPixelColor(i);
+      uint32_t color_2 = pixels.getPixelColor(i + 1);
+      if (color_1 > color_2) {
+        semi_sort = 0;
+      }
+  }
+  if (semi_sort) {
+    for (int i = 0; i < PIXEL_COUNT; i++) {
+      set_color(i, random_color(3, 2, 2));
+    }
+  }
+
+  int delay_1 = map(knob_val, 0, KNOB_MAX, 25, 550);
+  if (current_time - *previous_time_1 >= delay_1) {
+    for (int i = 0; i < PIXEL_COUNT - 1; i++) {
+      uint32_t color_1 = pixels.getPixelColor(i);
+      uint32_t color_2 = pixels.getPixelColor(i + 1);
+      if (color_1 > color_2) {
+        set_color(i + 1, color_1);
+        set_color(i, color_2);
+      }
+    }
     *previous_time_1 = current_time;
   }
 } 
@@ -678,7 +702,7 @@ Mode mode_7;
 Mode mode_8;
 Mode mode_9;
 Mode mode_10;
-Color colors[PIXEL_COUNT];
+Mode mode_11;
 void initialize() {
   pixels.begin(); // This initializes the NeoPixel library.
   
@@ -800,5 +824,14 @@ void initialize() {
   events_10[3].previous_time = current_time;
   mode_10 = (Mode) {
     .initialized = 0, .events = events_10, .execute = mode_10_execute
+  }; 
+
+  Event *events_11 = (Event*)malloc(2 * sizeof(Event));
+  events_11[0].index = PIXEL_COUNT;
+  events_11[0].previous_time = current_time;
+  events_11[1].index = 0;
+  events_11[1].previous_time = current_time;
+  mode_11 = (Mode) {
+    .initialized = 0, .events = events_11, .execute = mode_11_execute
   }; 
 }
