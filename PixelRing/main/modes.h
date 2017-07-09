@@ -1,5 +1,5 @@
 #define PIXEL_COUNT 24
-#define MODE_COUNT  12
+#define MODE_COUNT  24
 #define LIGHT_PIN   6
 #define KNOB_PIN    2
 #define KNOB_MAX 1023
@@ -37,3 +37,15 @@ extern Mode mode_8;
 extern Mode mode_9;
 extern Mode mode_10;
 extern Mode mode_11;
+extern Mode mode_12;
+extern Mode mode_13;
+extern Mode mode_14;
+extern Mode mode_15;
+extern Mode mode_16;
+extern Mode mode_17;
+extern Mode mode_18;
+extern Mode mode_19;
+extern Mode mode_20;
+extern Mode mode_21;
+extern Mode mode_22;
+extern Mode mode_23;
