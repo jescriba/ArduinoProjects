@@ -557,7 +557,7 @@ void mode_8_execute(Mode *mode) {
   initialize_mode(mode);
 
   unsigned long current_time = millis();
-  
+
   int *index_0;
   index_0 = &mode->events[0].index;
 
@@ -582,18 +582,18 @@ void mode_8_execute(Mode *mode) {
 
     if (rotation_direction <= 25) {
       *index_0 += 1;
-      *index_0 %= PIXEL_COUNT; 
+      *index_0 %= PIXEL_COUNT;
     } else if (rotation_direction <= 50) {
       *index_0 -= 1;
-      *index_0 %= PIXEL_COUNT; 
+      *index_0 %= PIXEL_COUNT;
     } else {
       int rand_direction = random(3);
       if (rand_direction == 1) {
          *index_0 += 1;
-        *index_0 %= PIXEL_COUNT; 
+        *index_0 %= PIXEL_COUNT;
       } else {
         *index_0 -= 1;
-        *index_0 %= PIXEL_COUNT; 
+        *index_0 %= PIXEL_COUNT;
       }
     }
     *previous_time_0 = current_time;
@@ -623,7 +623,7 @@ void mode_9_execute(Mode *mode) {
   int delay_0 = map(knob_val, 0, KNOB_MAX, 300, 30000);
   if (current_time - *previous_time_0 >= delay_0) {
     set_color(*index_0, color(0, 5, 0));
-  
+
     *index_0 = random(PIXEL_COUNT);
     *previous_time_0 = current_time;
   }
@@ -1231,47 +1231,41 @@ void mode_16_execute(Mode *mode) {
 }
 
 void mode_17_execute(Mode *mode) {
-  // TODO
   initialize_mode(mode);
 
   unsigned long current_time = millis();
 
   int *index_0;
   index_0 = &mode->events[0].index;
-  int *index_1;
-  index_1 = &mode->events[1].index;
 
   unsigned long *previous_time_0;
   previous_time_0 = &(mode->events[0].previous_time);
-  unsigned long *previous_time_1;
-  previous_time_1 = &(mode->events[1].previous_time);
 
   float knob_val = knob_value();
-  int delay_0 = map(knob_val, 0, KNOB_MAX, 100, 400);
-  int delay_1 = map(knob_val, 0, KNOB_MAX, 5, 200);
-  if (current_time - *previous_time_1 >= delay_1) {
-    *index_1 += 1;
-    *index_1 %= PIXEL_COUNT;
-    *previous_time_1 = current_time;
+  int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 700);
+  int dir = map(knob_val, 0, KNOB_MAX, 0, 3);
+  if (dir == 2) {
+    dir == -1;
+    delay_0 = map(knob_val, 0, KNOB_MAX, 700, 75);
+  } else if (dir == 1) {
+    delay_0 = map(knob_val, 0, KNOB_MAX, 25, 700);
+    dir = 0;
+  } else {
+    delay_0 = map(knob_val, 0, KNOB_MAX, 50, 700);
+    dir = 1;
   }
-  if (current_time - *previous_time_0 >= delay_0) {
-    int red, green, blue;
-    if ((*index_1 + *index_0) % 3 == 0) {
-      red = 4;
-      green = 0;
-      blue = 0;
-    } else if ((*index_1 + *index_0) % 3 == 1) {
-      red = 0;
-      green = 4;
-      blue = 0;
-    } else {
-      red = 0;
-      green = 0;
-      blue = 4;
+  if (current_time - *previous_time_0 > delay_0) {
+    for (int i = 0; i < PIXEL_COUNT; i++) {
+      if ((i + dir * (*index_0) + 1) % 6 == 0) {
+        set_color(i, color(6, 4, 0));
+
+      } else {
+        set_color(i, color((i + dir * (*index_0)) % 6, 3, 0));
+      }
     }
-    set_color(*index_0, color(red, green, blue));
-    *index_0 += 1;
+    *index_0 += dir;
     *index_0 %= PIXEL_COUNT;
+
     *previous_time_0 = current_time;
   }
 }
@@ -1288,7 +1282,7 @@ void mode_18_execute(Mode *mode) {
   previous_time_0 = &(mode->events[0].previous_time);
 
   float knob_val = knob_value();
-  int delay_0 = map(knob_val, 0, KNOB_MAX, 25, 700);
+  int delay_0 = map(knob_val, 0, KNOB_MAX, 35, 600);
   if (current_time - *previous_time_0 > delay_0) {
     for (int i = 0; i < PIXEL_COUNT; i++) {
       if ((i + *index_0 + 1) % 6 == 0) {
@@ -1306,7 +1300,6 @@ void mode_18_execute(Mode *mode) {
 }
 
 void mode_19_execute(Mode *mode) {
-  // TODO
   initialize_mode(mode);
 
   unsigned long current_time = millis();
@@ -1315,28 +1308,27 @@ void mode_19_execute(Mode *mode) {
   index_0 = &mode->events[0].index;
 
   unsigned long *previous_time_0;
-  previous_time_0 = &mode->events[0].previous_time;
+  previous_time_0 = &(mode->events[0].previous_time);
 
   float knob_val = knob_value();
-  int delay_0 = map(knob_val, 0, KNOB_MAX, 75, 1000);
+  int delay_0 = map(knob_val, 0, KNOB_MAX, 100, 1300);
+  int color_tweak = map(knob_val, 0, KNOB_MAX, 0, 3);
   if (current_time - *previous_time_0 >= delay_0) {
-//    for (int i )
-//    if (*index_0 % 8 == 0) {
-//      set_color();
-//    } else {
-//      
-//    }
+    for (int i = 0; i < PIXEL_COUNT; i++) {
+      if (i % 3 == 0) {
+        set_color(i, color(random(color_tweak), random(5) + 1, 0));
+      } else if (i % 3 == 1) {
+        set_color(i, color(random(color_tweak), 0, random(5) + 1));
+      } else {
+        set_color(i, color(random(5) + 1, 0, random(color_tweak)));
+      }
+    }
+   
     *previous_time_0 = current_time;
   }
 }
 
 void mode_20_execute(Mode *mode) {
-  // TODO
-  initialize_mode(mode);
-}
-
-void mode_21_execute(Mode *mode) {
-  // TODO
   initialize_mode(mode);
 
   unsigned long current_time = millis();
@@ -1347,40 +1339,125 @@ void mode_21_execute(Mode *mode) {
   index_1 = &mode->events[1].index;
 
   unsigned long *previous_time_0;
-  previous_time_0 = &mode->events[0].previous_time;
+  previous_time_0 = &(mode->events[0].previous_time);
   unsigned long *previous_time_1;
-  previous_time_1 = &mode->events[1].previous_time;
+  previous_time_1 = &(mode->events[1].previous_time);
 
   float knob_val = knob_value();
-  int delay_0 = map(knob_val, 0, KNOB_MAX, 100, 2500);
-  int delay_1 = map(knob_val, 0, KNOB_MAX, 5, 500);
+  int delay_0 = map(knob_val, 0, KNOB_MAX, 50, 800);
   if (current_time - *previous_time_0 >= delay_0) {
-    if (*index_0 == 1) {
-      alternate_3_colors(color(2, 0, 0), color(0, 0, 2), color(0, 2, 0));
-      *index_0 = 2;
-    } else if (*index_0 == 2) {
-      alternate_3_colors(color(0, 2, 0), color(2, 0, 0), color(0, 0, 2));
-      *index_0 = 0;
-    } else {
-      alternate_3_colors(color(0, 0, 2), color(0, 2, 0), color(2, 0, 0));
-      *index_0 = 1;
+    for (int i = 0; i < PIXEL_COUNT; i++) {
+      if (i == *index_0) {
+        set_color(i, color(5, 0, 1));
+      } else if (i == *index_1) {
+        set_color(i, color(2, 0, 4));
+      } else {
+        set_color(i, color(2, 0, 1));
+      }
+    }
+
+    (*index_0)--;
+    if (*index_0 < 0) {
+      *index_0 = PIXEL_COUNT;
+    }
+    *previous_time_0 = current_time;
+  }
+
+   map(knob_val, 0, KNOB_MAX, 0, 2);
+   int delay_1 = map(knob_val, 0, KNOB_MAX, 100, 500);
+   if (current_time - *previous_time_1 >= delay_1) {
+     set_color(*index_1, color(2, 0, 4));
+     (*index_1)++;
+     (*index_1)%=PIXEL_COUNT;
+     *previous_time_1 = current_time;
+   }
+}
+
+int neighbors_on(int index, int on) {
+  int left_on = 1;
+  int right_on = 1;
+  int total = 0 + on;
+  for (int i = 1; i <= PIXEL_COUNT; i++) {
+    int left_index = index - i;
+    int right_index = (index + i) % PIXEL_COUNT;
+    if (left_index < 0) {
+      left_index = PIXEL_COUNT - 1;
+    }
+    if (left_on && pixels.getPixelColor(left_index) == 0) {
+      left_on = 0;
+    }
+    if (right_on && pixels.getPixelColor(right_index) == 0) {
+      right_on = 0;
+    }
+    if (left_on) {
+      total += 1;
+    }
+    if (right_on) {
+      total += 1;
+    }
+    if (!left_on && !right_on) {
+      break;
+    }
+  }
+
+  return total;
+}
+
+void mode_21_execute(Mode *mode) {
+  initialize_mode(mode);
+
+  unsigned long current_time = millis();
+
+  int *index_0;
+  index_0 = &mode->events[0].index;
+  int *index_1;
+  index_1 = &mode->events[1].index;
+
+  unsigned long *previous_time_0;
+  previous_time_0 = &(mode->events[0].previous_time);
+  unsigned long *previous_time_1;
+  previous_time_1 = &(mode->events[1].previous_time);
+  unsigned long *previous_time_2;
+  previous_time_2 = &(mode->events[2].previous_time);
+
+  float knob_val = knob_value();
+  int delay_0 = map(knob_val, 0, KNOB_MAX, 45000, 55000);
+  int delay_1 = map(knob_val, 0, KNOB_MAX, 5, 200);
+  int delay_2 = map(knob_val, 0, KNOB_MAX, 300, 600);
+  if (current_time - *previous_time_0 >= delay_0) {
+    for (int i = 0; i < PIXEL_COUNT; i++) {
+      if (random(2) == 1) {
+        set_color(i, color(4, 1, 0));
+      } else {
+        set_color(i, color(0, 0, 0));
+      }
     }
     *previous_time_0 = current_time;
   }
 
   if (current_time - *previous_time_1 >= delay_1) {
-    if (random(2) == 1) {
-      *index_1 += 1;
-      *index_1 %= PIXEL_COUNT;
+    uint32_t color_1 = pixels.getPixelColor(*index_1);
+    int neighbors = neighbors_on(*index_1, color_1 != 0);
+    if (color_1) {
+      if (neighbors > 3) {
+        set_color(*index_1, color(0, 0, 0));
+      } else if (neighbors < 2) {
+        set_color(*index_1, color(0, 0, 0));
+      }
     } else {
-      *index_1 -= 1;
-      *index_1 %= PIXEL_COUNT;
-      if (*index_1 < 0) {
-        *index_1 = 0; 
+      if (neighbors == 3) {
+        set_color(*index_1, color(4, 0, 0));
       }
     }
-    set_color(*index_1, color(3, 0, 2));
+    (*index_1)++;
+    (*index_1)%=PIXEL_COUNT;
     *previous_time_1 = current_time;
+  }
+
+  if (current_time - *previous_time_2 >= delay_2) {
+    int i = random(PIXEL_COUNT);
+    set_color(i, color(random(2), random(2), random(2)));
+    *previous_time_2 = current_time;
   }
 }
 
@@ -1388,7 +1465,7 @@ void mode_22_execute(Mode *mode) {
   initialize_mode(mode);
 
   unsigned long current_time = millis();
-  
+
   int *index_0;
   index_0 = &mode->events[0].index;
 
@@ -1410,13 +1487,12 @@ void mode_22_execute(Mode *mode) {
       }
     }
     *index_0 += 1;
-    *index_0 %= PIXEL_COUNT; 
+    *index_0 %= PIXEL_COUNT;
     *previous_time_0 = current_time;
   }
 }
 
 void mode_23_execute(Mode *mode) {
-  // TODO
   initialize_mode(mode);
 
   unsigned long current_time = millis();
@@ -1452,7 +1528,7 @@ void mode_23_execute(Mode *mode) {
       *index_0 -= 1;
       *index_0 %= PIXEL_COUNT;
       if (*index_0 < 0) {
-        *index_0 = 0; 
+        *index_0 = 0;
       }
     }
     set_color(*index_0, color(6, 0, 1));
@@ -1467,7 +1543,7 @@ void mode_23_execute(Mode *mode) {
       *index_1 -= 1;
       *index_1 %= PIXEL_COUNT;
       if (*index_1 < 0) {
-        *index_1 = 0; 
+        *index_1 = 0;
       }
     }
     set_color(*index_1, color(5, 2, 0));
@@ -1482,10 +1558,10 @@ void mode_23_execute(Mode *mode) {
       *index_2 -= 1;
       *index_2 %= PIXEL_COUNT;
       if (*index_3 < 0) {
-        *index_3 = 0; 
+        *index_3 = 0;
       }
     }
-    set_color(*index_2, color(3, 3, 0));
+    set_color(*index_2, color(4, 3, 0));
     *previous_time_2 = current_time;
   }
 
@@ -1497,10 +1573,10 @@ void mode_23_execute(Mode *mode) {
       *index_3 -= 1;
       *index_3 %= PIXEL_COUNT;
       if (*index_3 < 0) {
-        *index_3 = 0; 
+        *index_3 = 0;
       }
     }
-    set_color(*index_3, color(0, 1, 3));
+    set_color(*index_3, color(0, 1, 4));
     *previous_time_3 = current_time;
   }
 }
@@ -1766,11 +1842,9 @@ void initialize() {
     .initialized = 0, .events = events_18, .execute = mode_18_execute
   };
 
-  Event *events_19 = (Event*)malloc(2 * sizeof(Event));
-  events_19[0].index = PIXEL_COUNT;
+  Event *events_19 = (Event*)malloc(1 * sizeof(Event));
+  events_19[0].index = random(PIXEL_COUNT);
   events_19[0].previous_time = current_time;
-  events_19[1].index = 0;
-  events_19[1].previous_time = current_time;
   mode_19 = (Mode) {
     .initialized = 0, .events = events_19, .execute = mode_19_execute
   };
@@ -1784,11 +1858,13 @@ void initialize() {
     .initialized = 0, .events = events_20, .execute = mode_20_execute
   };
 
-  Event *events_21 = (Event*)malloc(2 * sizeof(Event));
+  Event *events_21 = (Event*)malloc(3 * sizeof(Event));
   events_21[0].index = PIXEL_COUNT;
   events_21[0].previous_time = current_time;
   events_21[1].index = 0;
   events_21[1].previous_time = current_time;
+  events_21[2].index = 0;
+  events_21[2].previous_time = current_time;
   mode_21 = (Mode) {
     .initialized = 0, .events = events_21, .execute = mode_21_execute
   };
